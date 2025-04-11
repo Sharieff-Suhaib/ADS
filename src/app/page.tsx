@@ -1,8 +1,7 @@
-
 "use client";
 
 import {useState, useEffect} from 'react';
-import {Sidebar, SidebarContent, SidebarInset} from "@/components/ui/sidebar";
+import {Sidebar, SidebarContent, SidebarInset, SidebarProvider} from "@/components/ui/sidebar";
 import GraphInput from "@/components/GraphInput";
 import MapComponent from "@/components/MapComponent";
 
@@ -37,20 +36,24 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-secondary">
-      <Sidebar collapsible="icon">
-        <SidebarContent>
-          <GraphInput
-            onGraphUpdate={handleGraphUpdate}
-            onShortestPathCalculation={handleShortestPathCalculation}
+      <SidebarProvider>
+        <Sidebar collapsible="icon">
+          <SidebarContent>
+            <GraphInput
+              onGraphUpdate={handleGraphUpdate}
+              onShortestPathCalculation={handleShortestPathCalculation}
+            />
+          </SidebarContent>
+        </Sidebar>
+        <SidebarInset>
+          <MapComponent
+            graphData={graphData}
+            shortestPath={shortestPath}
           />
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset>
-        <MapComponent
-          graphData={graphData}
-          shortestPath={shortestPath}
-        />
-      </SidebarInset>
+        </SidebarInset>
+      </SidebarProvider>
     </div>
   );
 }
+
+    
