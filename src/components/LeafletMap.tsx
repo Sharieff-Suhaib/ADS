@@ -38,7 +38,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
 
     // Clear existing markers and routes
     mapInstance.current.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof LRM.Routing.Control) { // Check for LRM.Routing.Control
+      if (layer instanceof L.Marker || (LRM && LRM.Routing && layer instanceof LRM.Routing.Control)) { // Check for LRM.Routing.Control
         mapInstance.current?.removeLayer(layer);
       }
     });
@@ -57,22 +57,23 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
         return L.latLng(node.lat, node.lng);
       });
 
-      if (routingControl.current) {
+      if (routingControl.current && mapInstance.current) {
         mapInstance.current.removeControl(routingControl.current);
       }
 
-      routingControl.current = LRM.Routing.control({ // Use LRM.Routing here
-        waypoints: waypoints,
-        lineOptions: {
-          styles: [{color: 'orange', opacity: 1, weight: 5}]
-        },
-        createMarker: function() { return null; },
-        show: false,
-        addWaypoints: false,
-        routeWhileDragging: false,
-        draggableWaypoints: false,
-        useZoomParameter: false,
-      }).addTo(mapInstance.current);
+      if (LRM && LRM.Routing && mapInstance.current) {
+          routingControl.current = LRM.Routing.control({ // Use LRM.Routing here
+            waypoints: waypoints,
+            lineOptions: {
+              styles: [{color: 'orange', opacity: 1, weight: 5}]
+            },
+            createMarker: function() { return null; },
+            show: false,
+            addWaypoints: false,
+            routeWhileDragging: false,
+            useZoomParameter: false,
+          }).addTo(mapInstance.current);
+      }
     }
   }, [graphData, shortestPath]);
 
