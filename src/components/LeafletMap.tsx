@@ -17,6 +17,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
   const mapInstance = useRef<L.Map | null>(null);
   const routingControl = useRef<LRM.Routing.Control | null>(null);
   const {toast} = useToast();
+  const shortestPathLines = useRef<L.Polyline[]>([]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -36,11 +37,18 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
   useEffect(() => {
     if (!mapInstance.current) return;
 
+    // Clear existing markers, routes and shortest path lines
     mapInstance.current.eachLayer((layer) => {
-      if (layer instanceof L.Marker || (LRM && LRM.Routing && layer instanceof LRM.Routing.Control)) {
+      if (layer instanceof L.Marker || (LRM && LRM.Routing && layer instanceof LRM.Routing.Control) || layer instanceof L.Polyline) {
         mapInstance.current?.removeLayer(layer);
       }
     });
+
+    // Clear shortest path lines array
+    shortestPathLines.current.forEach(line => {
+        mapInstance.current?.removeLayer(line);
+    });
+    shortestPathLines.current = [];
 
     graphData.nodes.forEach((node) => {
       if (node.lat && node.lng) {
@@ -48,56 +56,41 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
       }
     });
 
-    if (shortestPath && shortestPath.path.length > 0) {
-      const waypoints = shortestPath.path.map((nodeId) => {
-        const node = graphData.nodes.find((node) => node.id === nodeId);
-        if (!node || !node.lat || !node.lng) {
-          toast({
-            title: "Error",
-            description: `Could not find coordinates for node ${nodeId}.`,
-            variant: "destructive",
+      if (shortestPath && shortestPath.path.length > 0) {
+          // Find the edges that are part of the shortest path
+          const shortestPathEdges = [];
+          for (let i = 0; i < shortestPath.path.length - 1; i++) {
+              const sourceNodeId = shortestPath.path[i];
+              const targetNodeId = shortestPath.path[i + 1];
+              const edge = graphData.edges.find(
+                  (edge) => edge.source === sourceNodeId && edge.target === targetNodeId
+              );
+              if (edge) {
+                  shortestPathEdges.push(edge);
+              }
+          }
+
+          // Draw polylines for the shortest path edges
+          shortestPathEdges.forEach((edge) => {
+              const sourceNode = graphData.nodes.find((node) => node.id === edge.source);
+              const targetNode = graphData.nodes.find((node) => node.id === edge.target);
+
+              if (sourceNode && targetNode && sourceNode.lat && sourceNode.lng && targetNode.lat && targetNode.lng) {
+                  const polyline = L.polyline(
+                      [
+                          [sourceNode.lat, sourceNode.lng],
+                          [targetNode.lat, targetNode.lng],
+                      ],
+                      {
+                          color: 'orange', // Highlight color
+                          weight: 5,       // Make the line thicker
+                          opacity: 0.7,
+                      }
+                  ).addTo(mapInstance.current!);
+                  shortestPathLines.current.push(polyline);
+              }
           });
-          return null;
-        }
-        return L.latLng(node.lat, node.lng);
-      }).filter(node => node !== null);
-
-      if (waypoints.length < 2) {
-        toast({
-          title: "Error",
-          description: "At least two valid nodes are required to draw a route.",
-          variant: "destructive",
-        });
-        return;
       }
-
-      if (routingControl.current && mapInstance.current) {
-        mapInstance.current.removeControl(routingControl.current);
-      }
-
-      try {
-        if (LRM && LRM.Routing && mapInstance.current) {
-          routingControl.current = LRM.Routing.control({
-            waypoints: waypoints,
-            lineOptions: {
-              styles: [{color: 'orange', opacity: 1, weight: 5}]
-            },
-            createMarker: function() { return null; },
-            show: false,
-            addWaypoints: false,
-            routeWhileDragging: false,
-            useZoomParameter: false,
-          }).addTo(mapInstance.current);
-        }
-      } catch (error: any) {
-        toast({
-          title: "Routing Error",
-          description: `Failed to calculate route: ${error.message}`,
-          variant: "destructive",
-        });
-        console.error("Routing error:", error);
-      }
-    }
   }, [graphData, shortestPath, toast]);
 
   return <div ref={mapRef} className="h-full w-full"/>;
