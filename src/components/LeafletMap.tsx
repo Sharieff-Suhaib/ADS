@@ -3,6 +3,8 @@
 import {useEffect, useRef} from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import 'leaflet-routing-machine';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 
 interface LeafletMapProps {
   graphData: { nodes: any[], edges: any[] };
@@ -12,6 +14,7 @@ interface LeafletMapProps {
 export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath}) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
+  const routingControl = useRef<L.Routing.Control | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -31,38 +34,43 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
   useEffect(() => {
     if (!mapInstance.current) return;
 
-    // Clear existing markers and polylines
+    // Clear existing markers and routes
     mapInstance.current.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+      if (layer instanceof L.Marker || layer instanceof L.Routing.Control) {
         mapInstance.current?.removeLayer(layer);
       }
     });
 
     // Add nodes as markers
     graphData.nodes.forEach((node) => {
-      L.marker([node.lat, node.lng]).addTo(mapInstance.current!).bindPopup(node.label);
-    });
-
-    // Add edges as polylines
-    graphData.edges.forEach((edge) => {
-      const sourceNode = graphData.nodes.find((node) => node.id === edge.source);
-      const targetNode = graphData.nodes.find((node) => node.id === edge.target);
-
-      if (sourceNode && targetNode) {
-        const polyline = L.polyline(
-          [[sourceNode.lat, sourceNode.lng], [targetNode.lat, targetNode.lng]],
-          {color: 'blue'}
-        ).addTo(mapInstance.current!);
+      if (node.lat && node.lng) {
+        L.marker([node.lat, node.lng]).addTo(mapInstance.current!).bindPopup(node.label);
       }
     });
 
-    // Highlight the shortest path
-    if (shortestPath) {
-      const latlngs = shortestPath.path.map((nodeId) => {
+    // Display shortest path using Leaflet Routing Machine
+    if (shortestPath && shortestPath.path.length > 0) {
+      const waypoints = shortestPath.path.map((nodeId) => {
         const node = graphData.nodes.find((node) => node.id === nodeId);
-        return [node.lat, node.lng];
+        return L.latLng(node.lat, node.lng);
       });
-      const polyline = L.polyline(latlngs, {color: 'orange', weight: 5}).addTo(mapInstance.current!);
+
+      if (routingControl.current) {
+        mapInstance.current.removeControl(routingControl.current);
+      }
+
+      routingControl.current = L.Routing.control({
+        waypoints: waypoints,
+        lineOptions: {
+          styles: [{color: 'orange', opacity: 1, weight: 5}]
+        },
+        createMarker: function() { return null; },
+        show: false,
+        addWaypoints: false,
+        routeWhileDragging: false,
+        draggableWaypoints: false,
+        useZoomParameter: false,
+      }).addTo(mapInstance.current);
     }
   }, [graphData, shortestPath]);
 
