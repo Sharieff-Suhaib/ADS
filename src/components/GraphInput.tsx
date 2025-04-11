@@ -29,8 +29,8 @@ const GraphInput: React.FC<GraphInputProps> = ({
   onGraphUpdate,
   onShortestPathCalculation,
 }) => {
-  const [nodes, setNodes] = useState<Node[]>([{ id: "A", label: "Main Building", lat: 13.0105, lng: 80.2359 }, { id: "B", label: "Tagore Auditorium", lat: 13.0084, lng: 80.2377 }]);
-  const [edges, setEdges] = useState<Edge[]>([{source: "A", target: "B", distance: 10}]);
+  const [nodes, setNodes] = useState<Node[]>([{ id: "A", label: "Main Building Entrance", lat: 13.0065, lng: 80.2405 }, { id: "B", label: "Tagore Auditorium Entrance", lat: 13.0087, lng: 80.2391 }, {id: "C", label: "Road Junction 1", lat: 13.0075, lng: 80.2398}]);
+  const [edges, setEdges] = useState<Edge[]>([{source: "A", target: "C", distance: 50}, {source: "C", target: "B", distance: 60}]);
   const [startNode, setStartNode] = useState("A");
   const [endNode, setEndNode] = useState("B");
   const {toast} = useToast();
@@ -45,10 +45,10 @@ const GraphInput: React.FC<GraphInputProps> = ({
       return false;
     }
 
-    if (!edges.every(edge => edge.source && edge.target && typeof edge.distance === 'number')) {
+    if (!edges.every(edge => edge.source && edge.target && typeof edge.distance === 'number' && nodes.some(node => node.id === edge.source) && nodes.some(node => node.id === edge.target))) {
       toast({
         title: "Error",
-        description: "All edges must have a source, target, and distance.",
+        description: "All edges must have a source, target, and distance. Source and target nodes must exist.",
         variant: "destructive",
       });
       return false;

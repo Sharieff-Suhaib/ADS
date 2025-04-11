@@ -10,14 +10,16 @@ export default function Home() {
   const [shortestPath, setShortestPath] = useState(null);
 
   useEffect(() => {
-    // Example data for testing:
+    // Example data for Anna University, Chennai, Guindy
     const initialGraphData = {
       nodes: [
-        {id: "A", label: "Main Building", lat: 13.0105, lng: 80.2359},
-        {id: "B", label: "Tagore Auditorium", lat: 13.0084, lng: 80.2377},
+        {id: "A", label: "Main Building Entrance", lat: 13.0065, lng: 80.2405},
+        {id: "B", label: "Tagore Auditorium Entrance", lat: 13.0087, lng: 80.2391},
+        {id: "C", label: "Road Junction 1", lat: 13.0075, lng: 80.2398}, // Intermediate node
       ],
       edges: [
-        {source: "A", target: "B", distance: 100},
+        {source: "A", target: "C", distance: 50},
+        {source: "C", target: "B", distance: 60},
       ],
     };
     setGraphData(initialGraphData);

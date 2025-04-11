@@ -22,7 +22,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
   useEffect(() => {
     if (!mapRef.current) return;
 
-    mapInstance.current = L.map(mapRef.current).setView([20.5937, 78.9629], 5);
+    mapInstance.current = L.map(mapRef.current).setView([13.0075, 80.2398], 16); // Set view to Anna University
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
