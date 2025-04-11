@@ -56,34 +56,78 @@ const GraphInput: React.FC<GraphInputProps> = ({
     return true;
   }, [nodes, edges, toast]);
 
+  const bellmanFord = (graph: any) => {
+    const { nodes, edges, start_node, end_node } = graph;
+    const distances: { [key: string]: number } = {};
+    const predecessors: { [key: string]: string | null } = {};
+
+    // Initialize distances
+    nodes.forEach((node: any) => {
+        distances[node.id] = Infinity;
+        predecessors[node.id] = null;
+    });
+    distances[start_node] = 0;
+
+    // Relax edges repeatedly
+    for (let i = 0; i < nodes.length - 1; i++) {
+        edges.forEach((edge: any) => {
+            if (distances[edge.source] !== Infinity && distances[edge.source] + edge.weight < distances[edge.target]) {
+                distances[edge.target] = distances[edge.source] + edge.weight;
+                predecessors[edge.target] = edge.source;
+            }
+        });
+    }
+
+    // Check for negative-weight cycles
+    for (let edge of edges) {
+        if (distances[edge.source] !== Infinity && distances[edge.source] + edge.weight < distances[edge.target]) {
+            return { error: "Graph contains a negative-weight cycle" };
+        }
+    }
+
+    // Reconstruct path
+    const path = [];
+    let currentNode: string | null = end_node;
+    while (currentNode) {
+        path.unshift(currentNode);
+        currentNode = predecessors[currentNode];
+    }
+
+    if (path[0] !== start_node) {
+        return { error: "No path found" };
+    }
+
+    return {
+        path: path,
+        distance: distances[end_node]
+    };
+};
+
   const handleCalculateShortestPath = async () => {
     if (!validateGraphData()) return;
 
     try {
-      const wasm = await import('bellman-ford-wasm');
-
-      const graph = {
+      const graphData = {
         nodes: nodes.map(node => ({ id: node.id })),
         edges: edges.map(edge => ({ source: edge.source, target: edge.target, weight: edge.distance })),
         start_node: startNode,
         end_node: endNode,
       };
 
-      const result = wasm.bellman_ford(JSON.stringify(graph));
-      const parsedResult = JSON.parse(result);
+      const result = bellmanFord(graphData);
 
-      if (parsedResult.error) {
+      if (result.error) {
         toast({
           title: "Error",
-          description: parsedResult.error,
+          description: result.error,
           variant: "destructive",
         });
         return;
       }
 
       const shortestPath = {
-        path: parsedResult.path,
-        totalDistance: parsedResult.distance,
+        path: result.path,
+        totalDistance: result.distance,
       };
 
       onShortestPathCalculation(shortestPath);
