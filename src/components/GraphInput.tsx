@@ -29,7 +29,7 @@ const GraphInput: React.FC<GraphInputProps> = ({
   onGraphUpdate,
   onShortestPathCalculation,
 }) => {
-  const [nodes, setNodes] = useState<Node[]>([{id: "A", label: "Node A", lat: 37.7749, lng: -122.4194}, {id: "B", label: "Node B", lat: 34.0522, lng: -118.2437}]);
+  const [nodes, setNodes] = useState<Node[]>([{ id: "A", label: "Main Building", lat: 13.0105, lng: 80.2359 }, { id: "B", label: "Tagore Auditorium", lat: 13.0084, lng: 80.2377 }]);
   const [edges, setEdges] = useState<Edge[]>([{source: "A", target: "B", distance: 10}]);
   const [startNode, setStartNode] = useState("A");
   const [endNode, setEndNode] = useState("B");

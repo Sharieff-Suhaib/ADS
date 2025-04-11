@@ -13,14 +13,11 @@ export default function Home() {
     // Example data for testing:
     const initialGraphData = {
       nodes: [
-        {id: "A", label: "Node A", lat: 37.7749, lng: -122.4194},
-        {id: "B", label: "Node B", lat: 34.0522, lng: -118.2437},
-        {id: "C", label: "Node C", lat: 40.7128, lng: -74.0060},
+        {id: "A", label: "Main Building", lat: 13.0105, lng: 80.2359},
+        {id: "B", label: "Tagore Auditorium", lat: 13.0084, lng: 80.2377},
       ],
       edges: [
-        {source: "A", target: "B", distance: 10},
-        {source: "B", target: "C", distance: 15},
-        {source: "A", target: "C", distance: 20},
+        {source: "A", target: "B", distance: 100},
       ],
     };
     setGraphData(initialGraphData);
@@ -57,3 +54,4 @@ export default function Home() {
     </div>
   );
 }
+
