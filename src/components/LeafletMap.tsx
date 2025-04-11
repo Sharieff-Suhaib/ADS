@@ -3,7 +3,8 @@
 import {useEffect, useRef} from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import 'leaflet-routing-machine';
+// Corrected import:  Import leaflet-routing-machine as a module
+import * as LRM from 'leaflet-routing-machine'; 
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 
 interface LeafletMapProps {
@@ -14,12 +15,13 @@ interface LeafletMapProps {
 export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath}) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
-  const routingControl = useRef<L.Routing.Control | null>(null);
+  const routingControl = useRef<LRM.Routing.Control | null>(null); // Use the correct type here
 
   useEffect(() => {
     if (!mapRef.current) return;
 
-    mapInstance.current = L.map(mapRef.current).setView([37.7749, -122.4194], 5);
+    // Set initial view to India
+    mapInstance.current = L.map(mapRef.current).setView([20.5937, 78.9629], 5);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -36,7 +38,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
 
     // Clear existing markers and routes
     mapInstance.current.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.Routing.Control) {
+      if (layer instanceof L.Marker || layer instanceof LRM.Routing.Control) { // Check for LRM.Routing.Control
         mapInstance.current?.removeLayer(layer);
       }
     });
@@ -59,7 +61,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({graphData, shortestPath})
         mapInstance.current.removeControl(routingControl.current);
       }
 
-      routingControl.current = L.Routing.control({
+      routingControl.current = LRM.Routing.control({ // Use LRM.Routing here
         waypoints: waypoints,
         lineOptions: {
           styles: [{color: 'orange', opacity: 1, weight: 5}]
