@@ -46,14 +46,14 @@ export default function Home() {
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <MapComponent
-            graphData={graphData}
-            shortestPath={shortestPath}
-          />
+          <div className="h-full">
+            <MapComponent
+              graphData={graphData}
+              shortestPath={shortestPath}
+            />
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </div>
   );
 }
-
-    
