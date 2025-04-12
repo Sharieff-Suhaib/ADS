@@ -15,7 +15,7 @@ export default function Home() {
       nodes: [
         {id: "A", label: "Main Building Entrance", lat: 13.0065, lng: 80.2405},
         {id: "B", label: "Tagore Auditorium Entrance", lat: 13.0087, lng: 80.2391},
-        {id: "C", label: "Road Junction 1", lat: 13.0075, lng: 80.2398}, // Intermediate node
+        {id: "C", label: "Road Junction 1", lat: 13.0075, lng: 80.2398},
       ],
       edges: [
         {source: "A", target: "C", distance: 50},
