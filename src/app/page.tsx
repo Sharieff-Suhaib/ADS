@@ -10,7 +10,6 @@ export default function Home() {
   const [shortestPath, setShortestPath] = useState(null);
 
   useEffect(() => {
-    // Example data for Anna University, Chennai, Guindy
     const initialGraphData = {
       nodes: [
         {id: "A", label: "Main Building Entrance", lat: 13.0065, lng: 80.2405},
@@ -35,6 +34,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-secondary">
+      <h1>Hello</h1>
       <SidebarProvider>
         <Sidebar collapsible="icon">
           <SidebarContent>
